@@ -21,7 +21,7 @@ from core.file_handler import (
 from PIL import Image
 import io
 
-SAMPLE_DOCS = Path(__file__).parent.parent.parent / "sample_docs"
+SAMPLE_DOCS = Path(__file__).parent.parent / "sample_docs"
 
 
 # ── File type detection ───────────────────────────────────────────────────────
