@@ -6,6 +6,9 @@ An AI-powered multi-agent pipeline that automates health insurance claim review.
 
 ## System Overview
 
+![Architecture Diagram](architecture_diagram.png)
+
+
 ```
 Member uploads claim + documents
         ↓
