@@ -60,9 +60,9 @@ class FileContent:
     @property
     def quality_label(self) -> str:
         score = self.overall_blur_score
-        if score >= 2000:
+        if score >= 5000:
             return "GOOD"
-        elif score >= 800:
+        elif score >= 500:
             return "DEGRADED"
         else:
             return "UNREADABLE"
@@ -175,7 +175,7 @@ def _process_image(file_bytes: bytes, file_id: str, file_name: str) -> FileConte
         b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
 
         blur_score  = _compute_blur_score(img)
-        is_degraded = blur_score < 2000
+        is_degraded = blur_score < 5000
 
         page = PageContent(
             page_number=1,
@@ -210,16 +210,24 @@ def _resize_if_needed(img: Image.Image, max_dim: int = 2048) -> Image.Image:
 
 
 def _compute_blur_score(img: Image.Image) -> float:
-    gray      = img.convert("L").resize((256, 256))
-    edges     = gray.filter(ImageFilter.FIND_EDGES)
+    """
+    Laplacian variance - proper sharpness metric.
+    Sharp document: 10000+. Degraded: 500-10000. Unreadable: below 500.
+    """
     import statistics
-    pixels = list(edges.tobytes())
-    if not pixels:
-        return 100.0
-    try:
-        return statistics.variance(pixels)
-    except Exception:
-        return 100.0
+    gray = img.convert("L").resize((256, 256))
+    pixels = list(gray.tobytes())
+    w, h = gray.size
+    lap = []
+    for y in range(1, h - 1):
+        for x in range(1, w - 1):
+            val = (
+                -pixels[(y-1)*w + x-1] - pixels[(y-1)*w + x] - pixels[(y-1)*w + x+1]
+                -pixels[y*w + x-1]     + 8*pixels[y*w + x]   - pixels[y*w + x+1]
+                -pixels[(y+1)*w + x-1] - pixels[(y+1)*w + x] - pixels[(y+1)*w + x+1]
+            )
+            lap.append(val * val)
+    return round(statistics.mean(lap), 1) if lap else 100.0
 
 
 # ── Build vision message content for GPT-4o ──────────────────────────────────

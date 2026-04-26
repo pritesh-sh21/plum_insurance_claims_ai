@@ -48,11 +48,13 @@ export default function ClaimForm({ onResult }) {
 
   const guessDocType = (filename) => {
     const name = filename.toLowerCase()
-    if (name.includes('hospital_bill') || name.includes('bill') || name.includes('invoice')) return 'HOSPITAL_BILL'
-    if (name.includes('lab') || name.includes('report') || name.includes('mri')) return 'LAB_REPORT'
+    if (name.includes('prescription')) return 'PRESCRIPTION'
     if (name.includes('pharmacy')) return 'PHARMACY_BILL'
-    if (name.includes('dental')) return 'DENTAL_REPORT'
+    if (name.includes('dental_report')) return 'DENTAL_REPORT'
     if (name.includes('discharge')) return 'DISCHARGE_SUMMARY'
+    if (name.includes('bill') || name.includes('invoice')) return 'HOSPITAL_BILL'
+    if (name.includes('lab') || name.includes('report') || name.includes('mri')) return 'LAB_REPORT'
+    if (name.includes('dental')) return 'HOSPITAL_BILL'
     return 'PRESCRIPTION'
   }
 

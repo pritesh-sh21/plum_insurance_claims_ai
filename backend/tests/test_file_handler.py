@@ -58,7 +58,7 @@ def test_sharp_image_high_blur_score():
     draw.text((10, 10), "Sharp text on white", fill="black")
     draw.rectangle([20, 50, 180, 150], outline="black", width=2)
     score = _compute_blur_score(img)
-    assert score > 1000, f"Sharp image should score > 1000, got {score}"
+    assert score > 5000, f"Sharp image should score > 5000, got {score}"
 
 
 def test_blurry_image_low_blur_score():
@@ -68,7 +68,7 @@ def test_blurry_image_low_blur_score():
     for _ in range(10):
         img = img.filter(ImageFilter.GaussianBlur(radius=5))
     score = _compute_blur_score(img)
-    assert score < 2000, f"Blurry image should score < 2000, got {score}"
+    assert score < 500, f"Blurry image should score < 500, got {score}"
 
 
 # ── Image processing ──────────────────────────────────────────────────────────
@@ -210,6 +210,6 @@ def test_quality_labels():
         )]
         return fc
 
-    assert make_fc(2500).quality_label == "GOOD"
+    assert make_fc(10000).quality_label == "GOOD"
     assert make_fc(1000).quality_label == "DEGRADED"
-    assert make_fc(500).quality_label == "UNREADABLE"
+    assert make_fc(100).quality_label == "UNREADABLE"

@@ -83,6 +83,57 @@ def node_parser(state: ClaimState) -> ClaimState:
             detail=f"Parser crashed: {e}",
             confidence_delta=-0.4,
         ))
+
+    # Post-parse: cross-check patient names extracted by GPT-4o
+    state = _check_patient_names_post_parse(state)
+    return state
+
+
+# ── Post-parse patient name cross-check (TC003 for real uploads) ─────────────
+
+def _check_patient_names_post_parse(state: ClaimState) -> ClaimState:
+    """
+    After parsing, cross-check patient names extracted by GPT-4o.
+    This catches TC003 for real file uploads where verifier couldn't
+    check names before parsing.
+    """
+    parsed = state.get("parsed")
+    if not parsed:
+        return state
+
+    # Collect names per document from parsed data
+    named_docs = {}
+    for doc in parsed.parsed_documents:
+        fields = doc.fields or {}
+        name = fields.get("patient_name")
+        if name:
+            named_docs[doc.file_id] = name.strip().lower()
+
+    if len(set(named_docs.values())) > 1:
+        # Multiple distinct names found - flag as verification error
+        name_list = ", ".join(
+            f"{fid}: '{name}'"
+            for fid, name in named_docs.items()
+        )
+        from core.models import DocumentVerificationError, TraceStep, AgentStatus
+        error = DocumentVerificationError(
+            error_code="PATIENT_MISMATCH",
+            message=(
+                f"Your documents appear to belong to different people. "
+                f"We found: {name_list}. "
+                f"Please ensure all documents are for the same patient."
+            ),
+            details={"names_found": named_docs},
+        )
+        state["verification_errors"] = [error.model_dump()]
+        state["stopped_early"] = True
+        state["traces"].append(TraceStep(
+            agent="document_verifier",
+            status=AgentStatus.FAILED,
+            detail=f"Post-parse patient mismatch detected: {name_list}",
+            confidence_delta=-1.0,
+        ))
+
     return state
 
 
