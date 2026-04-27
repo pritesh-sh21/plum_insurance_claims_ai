@@ -5,7 +5,7 @@ import styles from './ClaimForm.module.css'
 const MEMBERS = [
   { id: 'EMP001', name: 'Rajesh Kumar' },
   { id: 'EMP002', name: 'Priya Singh' },
-  { id: 'EMP003', name: 'Amit Patel' },
+  { id: 'EMP003', name: 'Amit Verma' },
   { id: 'EMP004', name: 'Sneha Reddy' },
   { id: 'EMP005', name: 'Vikram Joshi' },
   { id: 'EMP006', name: 'Meera Nair' },
@@ -132,7 +132,7 @@ export default function ClaimForm({ onResult }) {
           <select className={styles.select} value={form.member_id}
             onChange={e => set('member_id', e.target.value)}>
             {MEMBERS.map(m => (
-              <option key={m.id} value={m.id}>{m.name} — {m.id}</option>
+              <option key={m.id} value={m.id}>{m.name} - {m.id}</option>
             ))}
           </select>
         </div>
